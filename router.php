@@ -1,6 +1,9 @@
 <?php
 // Start session for authentication
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 
 // Load configuration and helper files
 require_once 'config/constants.php';

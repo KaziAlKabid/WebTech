@@ -7,6 +7,19 @@ class AdminController {
             exit;
         }
     }
+    public function profile() {
+        require_once 'models/UserModel.php';
+        $userModel = new UserModel();
+        $user = $userModel->getUserByEmail($_SESSION['user_email']);
+
+        if (!$user) {
+            echo "Error: User not found.";
+            exit;
+        }
+
+        // Load the profile view
+        require_once 'views/profile.php';
+    }
 
     public function dashboard() {
         require_once 'views/admin/dashboard.php';

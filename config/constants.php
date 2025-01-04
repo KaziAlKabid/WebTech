@@ -4,6 +4,6 @@ if (!defined('BASE_URL')) {
 }
 
 if (!defined('SITE_NAME')) {
-    define('SITE_NAME', 'Lawyer Management System');
+    define('SITE_NAME', 'LawyerPro');
 }
 ?>
