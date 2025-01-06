@@ -158,8 +158,14 @@
         const password = passwordInput.value;
         const confirmPassword = confirmPasswordInput.value;
         isConfirmPasswordValid = false;
-
-        if (confirmPassword !== password) {
+        
+        if(!isPasswordValid){
+            confirmPasswordFeedbackDiv.innerText = 'Please enter a valid password first.';
+            confirmPasswordFeedbackDiv.className = 'text-danger mt-2';}
+        else if (!password) {
+        confirmPasswordFeedbackDiv.innerText = 'Please enter a password first.';
+        confirmPasswordFeedbackDiv.className = 'text-danger mt-2';}
+         else if (confirmPassword !== password) {
             confirmPasswordFeedbackDiv.innerText = 'Passwords do not match.';
             confirmPasswordFeedbackDiv.className = 'text-danger mt-2';
         } else {
@@ -192,11 +198,35 @@
         }
     });
 
+    function validateForm() {
+    if (!isEmailValid) {
+        alert('Please enter a valid email.');
+        return false;
+    }
+    if (!isPhoneValid) {
+        alert('Please enter a valid phone number.');
+        return false;
+    }
+    if (!isPasswordValid) {
+        alert('Please enter a valid password.');
+        return false;
+    }
+    if (!isConfirmPasswordValid) {
+        alert('Passwords do not match.');
+        return false;
+    }
+    return true;
+}
+
+
    
 
     // Handle Form Submission with AJAX
     document.getElementById('register-form').addEventListener('submit', function (event) {
         event.preventDefault();
+        if (!validateForm()) {
+        return; // Do not proceed with the AJAX submission
+    }
 
         const formData = new FormData(this);
 

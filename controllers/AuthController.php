@@ -4,6 +4,43 @@ class AuthController {
         // Load the registration view
         require_once 'views/auth/register.php';
     }
+    public function forgot_password() {
+        // Load the forgot password view
+        require_once 'views/auth/forgot_password.php';
+    }
+    public function processForgotPassword() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $email = $_POST['email'] ?? '';
+    
+            // Validate email
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                echo json_encode(['success' => false, 'message' => 'Invalid email format.']);
+                exit;
+            }
+    
+            // Check if email exists
+            $userModel = new UserModel();
+            if (!$userModel->emailExists($email)) {
+                echo json_encode(['success' => false, 'message' => 'No account found with this email.']);
+                exit;
+            }
+    
+            // Generate a unique token
+            $token = bin2hex(random_bytes(32));
+            $userModel->storePasswordResetToken($email, $token);
+    
+            // Generate the reset link
+            $resetLink = BASE_URL . "/router.php?controller=auth&action=resetPassword&token=$token";
+    
+            // Return JSON response with the reset link
+            echo json_encode(['success' => true, 'resetLink' => $resetLink]);
+            exit;
+        }
+    }
+    
+    
+    
+    
     public function store() {
         // Check if the form is submitted
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -51,33 +88,35 @@ class AuthController {
     
     public function authenticate() {
        
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
-
-        // Example: Validate credentials using UserModel
-        require_once 'models/UserModel.php';
+if (empty($email) || empty($password)) {
+            echo json_encode(['success' => false, 'message' => 'Email and password are required.']);
+            exit;
+        }
+        // Validate email
         $userModel = new UserModel();
         $user = $userModel->getUserByEmail($email);
-        
-
-        if ($user && password_verify($password, $user['password'])) {
-            // Set session variables
-            $_SESSION['user_email'] = $user['email'];
-            $_SESSION['user_name'] = $user['name'];
-            $_SESSION['user_role'] = $user['role'];
-            $_SESSION['user_id'] = $user['id'];
-
-            // Return success JSON response
-            header('Content-Type: application/json');
-            echo json_encode(['success' => true, 'redirect' => 'router.php?controller=admin&action=dashboard']);
-        } else {
-            // Return failure JSON response
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Invalid email or password.']);
+        if (!$user) {
+            echo json_encode(['success' => false, 'error' => 'email_not_found', 'message' => 'No account found with this email.']);
+            exit;
         }
+             // Verify password
+             if (!password_verify($password, $user['password'])) {
+                echo json_encode(['success' => false, 'error' => 'wrong_password', 'message' => 'Incorrect password.']);
+                exit;
+            }
+                // Login successful
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_role'] = $user['role'];
+        $_SESSION['user_name'] = $user['name'];
+        $_SESSION['user_email'] = $user['email'];
+        echo json_encode(['success' => true, 'redirect' => 'router.php?controller=admin&action=dashboard']);
         exit;
+        
     }
+}
     
     public function logout() {
         // Destroy the session
@@ -91,7 +130,8 @@ class AuthController {
     }
     public function checkEmail() {
         // Get the email from the request
-        $email = $_GET['email'] ?? null;
+     try{   $email = $_POST['email'] ?? $_GET['email'] ?? null;
+
     
         // Validate the email format
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -99,17 +139,17 @@ class AuthController {
             exit;
         }
     
-        // Use UserModel to check email existence
-        require_once 'models/UserModel.php';
+      
         $userModel = new UserModel();
         $emailExists = $userModel->emailExists($email);
     
-        // Return JSON response
+      
         echo json_encode(['exists' => $emailExists]);
         exit;
+    }catch (Exception $e) {
+        echo json_encode(['exists' => false, 'message' => 'Server error.']);
+        exit;
+    
     }
-    
-    
-    
-    
+    }
 }
