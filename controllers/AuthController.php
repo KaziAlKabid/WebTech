@@ -40,38 +40,79 @@ class AuthController {
     
     
     
-    
     public function store() {
-        // Check if the form is submitted
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Get form data
-            $name = $_POST['name'];
-            $password = $_POST['password'];
-            $email = $_POST['email'];
-            $role = $_POST['role'];
-            $address = $_POST['address'];
-            $phone = $_POST['phone'];
-
-            // Hash the password for security
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-            // Use the UserModel to save the user
-            require_once 'models/UserModel.php';
-            $userModel = new UserModel();
-
-            $isCreated = $userModel->createUser($name, $hashedPassword, $role,$email,$address,$phone);
-
-            if ($isCreated) {
-                // Redirect to login page after successful registration
-                header("Location: router.php?controller=auth&action=login");
-                exit;
-            } else {
-                // Reload the registration page with an error message
-                $error = "Registration failed. Please try again.";
-                require_once 'views/auth/register.php';
+        header('Content-Type: application/json');
+    
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Invalid request method.'
+                ]);
+                return;
             }
+    
+            // Retrieve form data
+            $name = $_POST['name'] ?? null;
+            $email = $_POST['email'] ?? null;
+            $password = $_POST['password'] ?? null;
+            $role = $_POST['role'] ?? null;
+            $address = $_POST['address'] ?? null;
+            $phone = $_POST['phone'] ?? null;
+    
+            // Validate fields
+            if (!$name || !$email || !$password || !$role || !$address || !$phone) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'All fields are required.'
+                ]);
+                return;
+            }
+    
+            // Hash password
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    
+            // Save user to database
+            $userModel = new UserModel();
+            $isCreated = $userModel->createUser($name, $hashedPassword, $role, $email, $address, $phone);
+    
+            if ($isCreated) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Registration successful!'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Registration failed. Please try again.'
+                ]);
+            }
+        } catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'An unexpected error occurred on the server.'
+            ]);
         }
     }
+    
+    public function checkPhone() {
+        header('Content-Type: application/json');
+    
+        $phone = $_GET['phone'] ?? null;
+    
+        if (!$phone) {
+            echo json_encode(['exists' => false, 'message' => 'No phone number provided.']);
+            return;
+        }
+    
+        $userModel = new UserModel();
+        $exists = $userModel->phoneExists($phone);
+    
+        echo json_encode(['exists' => $exists]);
+    }
+    
+    
+    
     
 
     public function login() {

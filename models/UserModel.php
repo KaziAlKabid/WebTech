@@ -38,6 +38,13 @@ class UserModel {
         // Return true if email exists, false otherwise
         return $stmt->fetchColumn() > 0;
     }
+    public function phoneExists($phone) {
+        $query = "SELECT COUNT(*) FROM users WHERE phone = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$phone]);
+        return $stmt->fetchColumn() > 0;
+    }
+    
     public function storePasswordResetToken($email, $token) {
         $expiry = date('Y-m-d H:i:s', strtotime('+1 hour')); // Token expires in 1 hour
         $query = "INSERT INTO password_resets (email, token, expiry) VALUES (:email, :token, :expiry)";

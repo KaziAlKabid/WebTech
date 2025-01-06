@@ -12,6 +12,8 @@
             <div class="card border border-primary shadow-lg rounded-3">
                 <div class="card-body">
                     <h3 class="card-title text-center mb-4">Register</h3>
+                       <!-- Feedback -->
+                      
                     <form id="register-form" action="router.php?controller=auth&action=store" method="POST">
                         <!-- Name Field -->
                         <div class="mb-3">
@@ -63,14 +65,14 @@
                                 <option value="lawyer">Lawyer</option>
                             </select>
                         </div>
-
+                        <div id="register-feedback" class="mt-3"></div>
                         <!-- Submit Button -->
                         <div class="mb-3">
                             <button type="submit" class="btn btn-primary w-100">Register</button>
                         </div>
+                         
 
-                        <!-- Feedback -->
-                        <div id="register-feedback" class="mt-3"></div>
+                     
                     </form>
                 </div>
             </div>
@@ -81,26 +83,29 @@
 
 <!-- JavaScript Logic -->
 <script>
+    // Initialize validation flags
+    let isEmailValid = false;
+    let isPhoneValid = false;
+    let isPasswordValid = false;
+    let isConfirmPasswordValid = false;
+
     // Email Validation
     document.getElementById('email').addEventListener('input', function () {
         const email = this.value;
         const feedbackDiv = document.getElementById('email-feedback');
         isEmailValid = false;
 
-        // Clear feedback if email is empty
         if (!email) {
             feedbackDiv.innerText = '';
             return;
         }
 
-        // Validate email format using Validator.js
         if (!validator.isEmail(email)) {
             feedbackDiv.innerText = 'Invalid email format.';
             feedbackDiv.className = 'text-danger mt-2';
             return;
         }
 
-        // Check email availability via server
         feedbackDiv.innerText = 'Valid email format. Checking availability...';
         feedbackDiv.className = 'text-success mt-2';
 
@@ -158,14 +163,14 @@
         const password = passwordInput.value;
         const confirmPassword = confirmPasswordInput.value;
         isConfirmPasswordValid = false;
-        
-        if(!isPasswordValid){
+
+        if (!isPasswordValid) {
             confirmPasswordFeedbackDiv.innerText = 'Please enter a valid password first.';
-            confirmPasswordFeedbackDiv.className = 'text-danger mt-2';}
-        else if (!password) {
-        confirmPasswordFeedbackDiv.innerText = 'Please enter a password first.';
-        confirmPasswordFeedbackDiv.className = 'text-danger mt-2';}
-         else if (confirmPassword !== password) {
+            confirmPasswordFeedbackDiv.className = 'text-danger mt-2';
+        } else if (!password) {
+            confirmPasswordFeedbackDiv.innerText = 'Please enter a password first.';
+            confirmPasswordFeedbackDiv.className = 'text-danger mt-2';
+        } else if (confirmPassword !== password) {
             confirmPasswordFeedbackDiv.innerText = 'Passwords do not match.';
             confirmPasswordFeedbackDiv.className = 'text-danger mt-2';
         } else {
@@ -177,82 +182,135 @@
 
     // Phone Validation
     const phoneInput = document.getElementById('phone');
-    const phoneFeedbackDiv = document.getElementById('phone-feedback');
-    phoneInput.addEventListener('input', () => {
-        const phoneValue = phoneInput.value;
-        isPhoneValid = false;
+const phoneFeedbackDiv = document.getElementById('phone-feedback');
+let phoneCheckTimeout; // Timeout variable for debounce
 
-        try {
-            const phoneNumber = libphonenumber.parsePhoneNumber(phoneValue, 'BD'); // Adjust region as needed
-            if (phoneNumber.isValid()) {
-                phoneFeedbackDiv.innerText = 'Valid phone number.';
-                phoneFeedbackDiv.className = 'text-success';
-                isPhoneValid = true;
-            } else {
-                phoneFeedbackDiv.innerText = 'Invalid phone number.';
-                phoneFeedbackDiv.className = 'text-danger';
-            }
-        } catch {
-            phoneFeedbackDiv.innerText = 'Invalid phone number format.';
-            phoneFeedbackDiv.className = 'text-danger';
+phoneInput.addEventListener('input', () => {
+    const phoneValue = phoneInput.value.trim();
+    clearTimeout(phoneCheckTimeout); // Clear debounce timer
+
+    // Reset feedback messages
+    phoneFeedbackDiv.innerText = '';
+    phoneFeedbackDiv.className = '';
+    if (!phoneValue) {
+        phoneFeedbackDiv.innerText = 'Field is empty';
+        phoneFeedbackDiv.className = 'text-danger mt-2';
+        return; // Stop further processing if the phone number is empty
+    }
+
+    // Validate phone format first
+    try {
+        const phoneNumber = libphonenumber.parsePhoneNumber(phoneValue, 'BD'); // Adjust region as needed
+        if (phoneNumber.isValid()) {
+            phoneFeedbackDiv.innerText = 'Valid phone number. Checking availability...';
+            phoneFeedbackDiv.className = 'text-info mt-2';
+
+            // Check availability only if the number is valid
+            phoneCheckTimeout = setTimeout(() => {
+                fetch(`router.php?controller=auth&action=checkPhone&phone=${encodeURIComponent(phoneValue)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            phoneFeedbackDiv.innerText = 'Phone number is already registered.';
+                            phoneFeedbackDiv.className = 'text-danger mt-2';
+                            
+                        } else {
+                            phoneFeedbackDiv.innerText = 'Phone number is valid and available.';
+                            phoneFeedbackDiv.className = 'text-success mt-2';
+                            isPhoneValid = true;
+                        }
+                    })
+                    .catch(() => {
+                        phoneFeedbackDiv.innerText = 'An error occurred while checking availability.';
+                        phoneFeedbackDiv.className = 'text-danger mt-2';
+                    });
+            }, 500); // Debounce delay for availability check
+        } else {
+            phoneFeedbackDiv.innerText = 'Invalid phone number.';
+            phoneFeedbackDiv.className = 'text-danger mt-2';
         }
-    });
+    } catch {
+        phoneFeedbackDiv.innerText = 'Invalid phone number format.';
+        phoneFeedbackDiv.className = 'text-danger mt-2';
+    }
+});
 
+
+    // Form Validation
     function validateForm() {
-    if (!isEmailValid) {
-        alert('Please enter a valid email.');
-        return false;
+        if (!isEmailValid) {
+            alert('Please enter a valid email.');
+            return false;
+        }
+        if (!isPhoneValid) {
+            alert('Please enter a valid phone number.');
+            return false;
+        }
+        if (!isPasswordValid) {
+            alert('Please enter a valid password.');
+            return false;
+        }
+        if (!isConfirmPasswordValid) {
+            alert('Passwords do not match.');
+            return false;
+        }
+        return true;
     }
-    if (!isPhoneValid) {
-        alert('Please enter a valid phone number.');
-        return false;
-    }
-    if (!isPasswordValid) {
-        alert('Please enter a valid password.');
-        return false;
-    }
-    if (!isConfirmPasswordValid) {
-        alert('Passwords do not match.');
-        return false;
-    }
-    return true;
-}
 
+    // Form Submission
 
-   
-
-    // Handle Form Submission with AJAX
     document.getElementById('register-form').addEventListener('submit', function (event) {
-        event.preventDefault();
-        if (!validateForm()) {
-        return; // Do not proceed with the AJAX submission
+    event.preventDefault(); // Prevent the default form submission behavior
+
+    if (!validateForm()) {
+        return; // Exit if form validation fails
     }
 
-        const formData = new FormData(this);
+    const formData = new FormData(this); // Collect form data
 
-        fetch('router.php?controller=auth&action=store', {
-            method: 'POST',
-            body: formData,
+    fetch('router.php?controller=auth&action=store', {
+        method: 'POST',
+        body: formData, // Send the form data in the body
+    })
+        .then(response => {
+            console.log('Response:', response); // Log the raw response for debugging
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`); // Handle HTTP errors
+            }
+            return response.json(); // Parse the response as JSON
         })
-            .then(response => response.json())
-            .then(data => {
-                const feedbackDiv = document.getElementById('register-feedback');
+        .then(data => {
+            console.log('Data:', data); // Log the parsed response data for debugging
+            const feedbackDiv = document.getElementById('register-feedback');
 
-                if (data.success) {
-                    this.reset(); // Reset form fields
-                    feedbackDiv.innerText = 'Registration successful! Please log in.';
-                    feedbackDiv.className = 'text-success';
-                } else {
-                    feedbackDiv.innerText = data.message || 'Registration failed. Please try again.';
-                    feedbackDiv.className = 'text-danger';
-                }
-            })
-            .catch(() => {
-                const feedbackDiv = document.getElementById('register-feedback');
-                feedbackDiv.innerText = 'An unexpected error occurred. Please try again.';
-                feedbackDiv.className = 'text-danger';
-            });
-    });
+            if (data.success) {
+                // Show success message
+                feedbackDiv.innerText = 'Registration successful! Redirecting to login page...';
+                feedbackDiv.className = 'text-success mt-3';
+
+                // Redirect after a delay (optional)
+                setTimeout(() => {
+                    window.location.href = 'router.php?controller=auth&action=login';
+                }, 2000); // 2-second delay before redirect
+            } else {
+                // Show error message from the server response
+                feedbackDiv.innerText = data.message || 'Registration failed. Please try again.';
+                feedbackDiv.className = 'text-danger mt-3';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error); // Log the error for debugging
+            const feedbackDiv = document.getElementById('register-feedback');
+            feedbackDiv.innerText = 'An unexpected error occurred. Please try again.';
+            feedbackDiv.className = 'text-danger mt-3';
+        });
+});
+
+
+
+
 </script>
 
+
 <?php include 'views/includes/footer.php'; ?>
+    
