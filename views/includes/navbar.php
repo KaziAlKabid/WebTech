@@ -17,7 +17,7 @@ if (!defined('SITE_NAME')) {
             <ul class="navbar-nav ms-auto">
             <?php if (isset($_SESSION['user_role'])): ?>
     <li class="nav-item">
-        <a class="nav-link active" href="router.php?controller=admin&action=dashboard">Dashboard</a>
+        <a class="nav-link active" href="router.php?controller=admin&action=dashboard">Home</a>
     </li>
     <li class="nav-item">
         <a class="nav-link active" href="router.php?controller=admin&action=profile">

@@ -154,8 +154,13 @@ if (empty($email) || empty($password)) {
         $_SESSION['user_role'] = $user['role'];
         $_SESSION['user_name'] = $user['name'];
         $_SESSION['user_email'] = $user['email'];
-        echo json_encode(['success' => true, 'redirect' => 'router.php?controller=admin&action=dashboard']);
-        exit;
+        if ($user['role'] === 'admin') {
+            echo json_encode(['success' => true, 'redirect' => 'router.php?controller=admin&action=dashboard']);
+            exit;
+        } else {
+            echo json_encode(['success' => true, 'redirect' => 'router.php?controller=client&action=dashboard']);
+            exit;
+        }
         
     }
 }
