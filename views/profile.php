@@ -42,6 +42,14 @@
                             </div>
                         <?php endif; ?>
 
+                        <!-- Specialization (Only for Client) -->
+                        <?php if ($_SESSION['user_role'] === 'client'): ?>
+                            <div class="mb-3">
+                                <label for="specialization" class="form-label">Specialization</label>
+                                <input type="text" class="form-control" id="specialization" name="specialization" value="<?= htmlspecialchars($user['specialization'] ?? '') ?>" readonly>
+                            </div>
+                        <?php endif; ?>
+
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-between">
                             <button type="button" id="edit-profile-btn" class="btn btn-warning">Edit Profile</button>

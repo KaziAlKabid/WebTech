@@ -16,14 +16,34 @@ if (!defined('SITE_NAME')) {
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
             <?php if (isset($_SESSION['user_role'])): ?>
-    <li class="nav-item">
-        <a class="nav-link active" href="router.php?controller=admin&action=dashboard">Home</a>
+
+    <?php if ($_SESSION['user_role'] === 'admin'): ?>
+    <li class="nav-item">  <a class="nav-link active" href="router.php?controller=admin&action=dashboard">Home</a>
+      
     </li>
+    <?php endif; ?>
+    <?php if ($_SESSION['user_role'] === 'client'): ?>
+    <li class="nav-item">  <a class="nav-link active" href="router.php?controller=client&action=dashboard">Home</a>
+      
+    </li>
+    <?php endif; ?>
+
+    <?php if ($_SESSION['user_role'] === 'admin'): ?>
     <li class="nav-item">
         <a class="nav-link active" href="router.php?controller=admin&action=profile">
             Welcome, <?php echo htmlspecialchars($_SESSION['user_name'], ENT_QUOTES, 'UTF-8'); ?>
         </a>
     </li>
+    <?php endif; ?>
+
+    <?php if ($_SESSION['user_role'] === 'client'): ?>
+    <li class="nav-item">
+        <a class="nav-link active" href="router.php?controller=client&action=profile">
+            Welcome, <?php echo htmlspecialchars($_SESSION['user_name'], ENT_QUOTES, 'UTF-8'); ?>
+        </a>
+    </li>
+    <?php endif; ?>
+
     <li class="nav-item">
         <a class="nav-link" href="router.php?controller=auth&action=logout">Logout</a>
     </li>
