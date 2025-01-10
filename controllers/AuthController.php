@@ -130,6 +130,7 @@ class AuthController {
     public function authenticate() {
        
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 if (empty($email) || empty($password)) {
