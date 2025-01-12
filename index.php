@@ -1,32 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>ProCare Solutions</title>
-    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
-</head>
-<body>
-    <div class="header">
-        <h1 class="website-title">ProCare Solutions</h1><br>
-        <div class="header">
-        <nav>
-            <ul>
-                <li><a href="index.php" class="button">Home</a></li>
-                <li><a href="./view/login.php" class="button">Login</a></li>
-                <li><a href="./view/registration.php" class="button"> Registration</a></li>
-            </ul>
-        </nav>
-        </div>
-        
-    </div>
+<?php
+require_once 'config/constants.php';
+?>
 
-    <div class="content">
-        <h2 class="text">Welcome to Our Website</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla auctor est eget tellus vulputate, et interdum justo iaculis.</p>
-        <a href="#" class="cta-button">Learn More</a>
-    </div>
 
-    <div class="footer">
-        <p>&copy; 2023 Your Website. All rights reserved.</p>
+
+<?php include 'views/includes/header.php'; ?>
+<?php include 'views/includes/navbar.php'; ?>
+
+<div class="container mt-5">
+    <div class="text-center">
+        <h1>Welcome to <?= SITE_NAME ?></h1>
+        <p>Your one-stop solution for managing lawyers, clients, and cases effectively.</p>
+        <a href="router.php?controller=auth&action=login" class="btn btn-primary">Get Started</a>
     </div>
-</body>
-</html>
+</div>
+
+<?php include 'views/includes/footer.php'; ?>
