@@ -157,10 +157,14 @@ if (empty($email) || empty($password)) {
         if ($user['role'] === 'admin') {
             echo json_encode(['success' => true, 'redirect' => 'router.php?controller=admin&action=dashboard']);
             exit;
-        } else {
+        } else if ($user['role'] === 'client') {
             echo json_encode(['success' => true, 'redirect' => 'router.php?controller=client&action=dashboard']);
             exit;
         }
+     else {
+            echo json_encode(['success' => true, 'redirect' => 'router.php?controller=lawyer&action=dashboard']);
+            exit;
+        } 
         
     }
 }
