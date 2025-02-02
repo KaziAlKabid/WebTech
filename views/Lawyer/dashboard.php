@@ -12,7 +12,7 @@
                     <p class="card-text">View all unassigned cases.</p>
                     <a href="router.php?controller=case&action=viewUnassignedCases" class="btn btn-primary">View Unassigned Cases</a>
 
-                    </div>
+                </div>
             </div>
         </div>
         </div>
@@ -26,7 +26,7 @@
                     <a href="router.php?controller=case&action=viewAssignedCases" class="btn btn-primary">View Accepted Cases</a>
                 </div>
             </div>
-                    </div>
+        </div>
 
      
 
@@ -43,4 +43,3 @@
 </div>
 
 <?php include 'views/includes/footer.php'; ?>
-
