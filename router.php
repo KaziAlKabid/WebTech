@@ -1,8 +1,16 @@
 <?php
+date_default_timezone_set('Asia/Dhaka');
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 // Start session for authentication
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+
 
 
 // Load configuration and helper files
@@ -16,20 +24,26 @@ spl_autoload_register(function ($className) {
         $file = $path . $className . '.php';
         if (file_exists($file)) {
             require_once $file;
+            
             return;
         }
     }
+    
 });
 
 // Get requested controller and action
 $controllerName = isset($_GET['controller']) ? ucfirst($_GET['controller']) . 'Controller' : null;
 $actionName = isset($_GET['action']) ? $_GET['action'] : null;
 
+
+
 if ($controllerName && $actionName) {
     $controllerFile = "controllers/$controllerName.php";
     if (file_exists($controllerFile)) {
         require_once $controllerFile;
         $controller = new $controllerName();
+       
+
         if (method_exists($controller, $actionName)) {
             $controller->$actionName();
         } else {

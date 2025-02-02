@@ -8,8 +8,49 @@ class AuthController {
         // Load the forgot password view
         require_once 'views/auth/forgot_password.php';
     }
-    public function processForgotPassword() {
+    public function processResetPassword() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+            $token = $_POST['token'] ?? '';
+            $password = $_POST['password'] ?? '';
+    
+            // Validate inputs
+            if (empty($token) || empty($password)) {
+                echo json_encode(['success' => false, 'message' => 'Token or password is missing.']);
+                exit;
+            }
+    
+            $userModel = new UserModel();
+            $resetRequest = $userModel->getUserByResetToken($token);
+    
+            // Validate token
+            if (!$resetRequest) {
+                echo json_encode(['success' => false, 'message' => 'Invalid or expired token.']);
+                exit;
+            }
+    
+            // Hash the new password
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $email = $resetRequest['email'];
+    
+            // Update the password
+            if ($userModel->updatePassword($email, $hashedPassword)) {
+                // Clear the token after successful password reset
+                $userModel->clearResetToken($token);
+    
+                echo json_encode(['success' => true, 'message' => 'Password reset successfully.']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Failed to reset password.']);
+            }
+            exit;
+        }}
+    
+
+    
+    
+        public function processForgotPassword() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
             $email = $_POST['email'] ?? '';
     
             // Validate email
@@ -20,28 +61,53 @@ class AuthController {
     
             // Check if email exists
             $userModel = new UserModel();
-            if (!$userModel->emailExists($email)) {
+            $user = $userModel->getUserByEmail($email);
+    
+            if (!$user) {
                 echo json_encode(['success' => false, 'message' => 'No account found with this email.']);
                 exit;
             }
     
-            // Generate a unique token
+            // Generate token and expiry
             $token = bin2hex(random_bytes(32));
-            $userModel->storePasswordResetToken($email, $token);
+            $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
+    
+            // Store the reset token
+            $userModel->storePasswordResetToken($email, $token, $expiry);
     
             // Generate the reset link
-            $resetLink = BASE_URL . "/router.php?controller=auth&action=resetPassword&token=$token";
+            $resetLink = SITE_URL . "/router.php?controller=auth&action=resetPassword&token=$token";
     
-            // Return JSON response with the reset link
+            // For localhost, display the reset link
             echo json_encode(['success' => true, 'resetLink' => $resetLink]);
             exit;
         }
     }
     
+    public function resetPassword() {
+        $token = $_GET['token'] ?? '';
+    
+        if (empty($token)) {
+            echo "Token is missing.";
+            exit;
+        }
+    
+        $userModel = new UserModel();
+        $resetRequest = $userModel->getUserByResetToken($token);
+    
+        if (!$resetRequest) {
+            echo "Invalid or expired token.";
+            exit;
+        }
+    
+        // Load reset password form
+        require_once 'views/auth/reset_password.php';
+    }
+    
     
     
     public function store() {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json'); // Ensure JSON response
     
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -59,12 +125,38 @@ class AuthController {
             $role = $_POST['role'] ?? null;
             $address = $_POST['address'] ?? null;
             $phone = $_POST['phone'] ?? null;
+            $license = $_POST['license'] ?? null;
+            $experience = $_POST['experience'] !== '' ? $_POST['experience'] : null;
+$specialization = $_POST['specialization'] !== '' ? $_POST['specialization'] : null;
+
     
-            // Validate fields
-            if (!$name || !$email || !$password || !$role || !$address || !$phone) {
+            // Validate common fields
+            if($role==='client') {if(!$name || !$email || !$password || !$role|| !$address || !$phone ) {
                 echo json_encode([
                     'success' => false,
-                    'message' => 'All fields are required.'
+                    'message' => 'Name, email, password, and role,address,phone are required.'
+                ]);
+                return;
+            }}
+    
+           
+           
+    
+            else if ($role === 'lawyer') {
+                if ($license===null || $experience===null || $specialization===null) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'License, experience, and specialization are required for lawyers.'
+                    ]);
+                    return;
+                }
+    
+                
+    
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Invalid role specified.'
                 ]);
                 return;
             }
@@ -74,41 +166,64 @@ class AuthController {
     
             // Save user to database
             $userModel = new UserModel();
-            $isCreated = $userModel->createUser($name, $hashedPassword, $role, $email, $address, $phone);
+            $isCreated = $userModel->createUser(
+                $name, 
+                $hashedPassword, 
+                $role, 
+                $email, 
+                $address, 
+                $phone, 
+                $license, 
+                $experience, 
+                $specialization
+            );
     
             if ($isCreated) {
                 echo json_encode([
                     'success' => true,
-                    'message' => 'Registration successful!'
+                    'message' => 'Registration successful!',
+                    'redirect' => 'router.php?controller=auth&action=login'
                 ]);
+                return;
             } else {
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Registration failed. Please try again.'
+                    'message' => 'Failed to register user.'
                 ]);
+                return;
             }
         } catch (Exception $e) {
+            // Handle unexpected errors
             echo json_encode([
                 'success' => false,
-                'message' => 'An unexpected error occurred on the server.'
+                'message' => 'An unexpected error occurred: ' . $e->getMessage()
             ]);
         }
     }
     
+    
+    
     public function checkPhone() {
         header('Content-Type: application/json');
     
-        $phone = $_GET['phone'] ?? null;
+        $phone = $_POST['phone'] ?? null;
+
     
         if (!$phone) {
             echo json_encode(['exists' => false, 'message' => 'No phone number provided.']);
             return;
         }
+        
     
         $userModel = new UserModel();
         $exists = $userModel->phoneExists($phone);
+        if ($exists) {
+            echo json_encode(['exists' => true]);
+        } else {
+            echo json_encode(['exists' => false]);
+        }
     
-        echo json_encode(['exists' => $exists]);
+       
     }
     
     
@@ -157,10 +272,13 @@ if (empty($email) || empty($password)) {
         if ($user['role'] === 'admin') {
             echo json_encode(['success' => true, 'redirect' => 'router.php?controller=admin&action=dashboard']);
             exit;
-        } else {
+        } else if($user['role'] === 'client') {
             echo json_encode(['success' => true, 'redirect' => 'router.php?controller=client&action=dashboard']);
             exit;
         }
+        else if($user['role'] === 'lawyer') {
+            echo json_encode(['success' => true, 'redirect' => 'router.php?controller=lawyer&action=dashboard']);
+            exit;}
         
     }
 }
@@ -176,27 +294,34 @@ if (empty($email) || empty($password)) {
         exit;
     }
     public function checkEmail() {
-        // Get the email from the request
-     try{   $email = $_POST['email'] ?? $_GET['email'] ?? null;
-
+        try {
+            // Set content type for JSON response
+            header('Content-Type: application/json');
     
-        // Validate the email format
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            echo json_encode(['exists' => false, 'message' => 'Invalid email format.']);
+            // Retrieve the email from POST or GET
+            $email = $_POST['email'] ?? $_GET['email'] ?? null;
+    
+            // Validate email format
+            if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                echo json_encode(['exists' => false, 'message' => 'Invalid email format.']);
+                exit;
+            }
+    
+            // Check if the email exists using the UserModel
+            $userModel = new UserModel();
+            $emailExists = $userModel->emailExists($email);
+    
+            // Return JSON response
+            echo json_encode(['exists' => $emailExists]);
+            exit;
+        } catch (Exception $e) {
+            // Log the error for debugging
+            error_log("Error in checkEmail: " . $e->getMessage());
+    
+            // Return a generic error message
+            echo json_encode(['exists' => false, 'message' => 'Server error.']);
             exit;
         }
-    
-      
-        $userModel = new UserModel();
-        $emailExists = $userModel->emailExists($email);
-    
-      
-        echo json_encode(['exists' => $emailExists]);
-        exit;
-    }catch (Exception $e) {
-        echo json_encode(['exists' => false, 'message' => 'Server error.']);
-        exit;
-    
     }
-    }
+    
 }

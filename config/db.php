@@ -1,21 +1,35 @@
 <?php
+
 class Database {
-    private $host = "localhost";
-    private $db_name = "lawyer_management";
-    private $username = "root";
-    private $password = "";
-    public $conn;
+    private static $instance = null; // Singleton instance
+    private $connection;
 
-    public function connect() {
-        $this->conn = null;
-
+    private function __construct() {
         try {
-            $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, $this->username, $this->password);
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->connection = new PDO(
+                "mysql:host=localhost;dbname=lawyer_management", // Your database credentials
+                "root", // Database username
+                "", // Database password
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                ]
+            );
         } catch (PDOException $exception) {
-            echo "Connection error: " . $exception->getMessage();
+            die("Database connection error: " . $exception->getMessage());
         }
+    }
 
-        return $this->conn;
+    // Method to get the single instance of the database connection
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    // Method to get the PDO connection
+    public function getConnection() {
+        return $this->connection;
     }
 }

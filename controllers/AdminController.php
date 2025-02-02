@@ -21,9 +21,18 @@ class AdminController {
         require_once 'views/profile.php';
     }
 
-    public function dashboard() {
-        require_once 'views/admin/dashboard.php';
+    public function Dashboard() {
+        $userModel = new UserModel();
+        $caseModel = new CaseModel();
+    
+        $clientCount = $userModel->getClientCount();
+        $lawyerCount = $userModel->getLawyerCount();
+        $caseCount = $caseModel->getCaseCount();
+        $userCount = $userModel->getUserCount();
+    
+        require_once 'views/admin/dashboard.php'; // Pass values to the view
     }
+    
 
     public function manageUsers() {
         require_once 'views/admin/manage_users.php';

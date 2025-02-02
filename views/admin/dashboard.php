@@ -10,7 +10,7 @@
             <div class="card border border-primary shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">Total Users</h5>
-                    <p class="card-text display-6">123</p>
+                    <p class="card-text display-6"><?=$userCount?></p>
                     <a href="router.php?controller=admin&action=manageUsers" class="btn btn-primary">View Users</a>
                 </div>
             </div>
@@ -19,7 +19,7 @@
             <div class="card border border-success shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">Total Lawyers</h5>
-                    <p class="card-text display-6">45</p>
+                    <p class="card-text display-6"><?=$lawyerCount?></p>
                     <a href="router.php?controller=admin&action=manageLawyers" class="btn btn-success">View Lawyers</a>
                 </div>
             </div>
@@ -28,7 +28,7 @@
             <div class="card border border-warning shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">Total Cases</h5>
-                    <p class="card-text display-6">78</p>
+                    <p class="card-text display-6"><?=$caseCount?></p>
                     <a href="router.php?controller=admin&action=manageCases" class="btn btn-warning">View Cases</a>
                 </div>
             </div>

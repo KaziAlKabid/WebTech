@@ -21,6 +21,7 @@
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" readonly>
                         </div>
+                        <div id="email-feedback"></div>
 
                         <!-- Address -->
                         <div class="mb-3">
@@ -42,14 +43,8 @@
                             </div>
                         <?php endif; ?>
 
-                        <!-- Specialization (Only for Client) -->
-                        <?php if ($_SESSION['user_role'] === 'client'): ?>
-                            <div class="mb-3">
-                                <label for="specialization" class="form-label">Specialization</label>
-                                <input type="text" class="form-control" id="specialization" name="specialization" value="<?= htmlspecialchars($user['specialization'] ?? '') ?>" readonly>
-                            </div>
-                        <?php endif; ?>
-
+                     
+                         
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-between">
                             <button type="button" id="edit-profile-btn" class="btn btn-warning">Edit Profile</button>
@@ -64,68 +59,10 @@
         </div>
     </div>
 </div>
-
-<script>
-// Toggle Editable Mode
-document.getElementById('edit-profile-btn').addEventListener('click', function () {
-    const inputs = document.querySelectorAll('#profile-form input, #profile-form textarea');
-    inputs.forEach(input => input.removeAttribute('readonly'));
-
-    // Show Save and Cancel buttons, hide Edit button
-    document.getElementById('save-profile-btn').style.display = 'inline-block';
-    document.getElementById('cancel-edit-btn').style.display = 'inline-block';
-    this.style.display = 'none';
-});
-
-// Cancel Editing
-document.getElementById('cancel-edit-btn').addEventListener('click', function () {
-    const inputs = document.querySelectorAll('#profile-form input, #profile-form textarea');
-    inputs.forEach(input => input.setAttribute('readonly', true));
-
-    // Hide Save and Cancel buttons, show Edit button
-    document.getElementById('edit-profile-btn').style.display = 'inline-block';
-    document.getElementById('save-profile-btn').style.display = 'none';
-    this.style.display = 'none';
-});
-
-// Save Changes
-document.getElementById('profile-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-
-    const formData = new FormData(this);
-
-    fetch('router.php?controller=auth&action=updateProfile', {
-        method: 'POST',
-        body: formData
-    })
-        .then(response => response.json())
-        .then(data => {
-            const feedbackDiv = document.getElementById('profile-feedback');
-
-            if (data.success) {
-                feedbackDiv.innerText = data.message;
-                feedbackDiv.className = 'text-success';
-
-                // Revert fields to readonly mode
-                const inputs = document.querySelectorAll('#profile-form input, #profile-form textarea');
-                inputs.forEach(input => input.setAttribute('readonly', true));
-
-                // Hide Save and Cancel buttons, show Edit button
-                document.getElementById('edit-profile-btn').style.display = 'inline-block';
-                document.getElementById('save-profile-btn').style.display = 'none';
-                document.getElementById('cancel-edit-btn').style.display = 'none';
-            } else {
-                feedbackDiv.innerText = data.message;
-                feedbackDiv.className = 'text-danger';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            const feedbackDiv = document.getElementById('profile-feedback');
-            feedbackDiv.innerText = 'An unexpected error occurred.';
-            feedbackDiv.className = 'text-danger';
-        });
-});
+<script type="module">
+    import { handleEditProfile } from '<?= SITE_URL ?>assets/js/profile.js';
+    handleEditProfile();
 </script>
+
 
 <?php include 'views/includes/footer.php'; ?>

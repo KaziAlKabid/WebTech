@@ -3,6 +3,12 @@ require_once 'config/constants.php';
 ?>
 
 
+<?php
+session_start();
+?>
+
+
+
 
 <?php include 'views/includes/header.php'; ?>
 <?php include 'views/includes/navbar.php'; ?>
