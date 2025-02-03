@@ -117,8 +117,8 @@ class UserModel {
         $stmt->bindParam(':token', $token);
         return $stmt->execute();
     }
-    public function updateUserProfile($userId, $name, $email, $address, $phone, $specialization, $role) {
-        $query = "UPDATE users SET name = :name, email = :email, address = :address, phone = :phone";
+    public function updateUserProfile($userId, $name,  $address, $phone, $specialization, $role) {
+        $query = "UPDATE users SET name = :name,  address = :address, phone = :phone";
     
         // Only update specialization if the user is a lawyer
         if ($role === 'lawyer') {
@@ -129,7 +129,7 @@ class UserModel {
     
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':name', $name, PDO::PARAM_STR);
-        $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+        
         $stmt->bindValue(':address', $address, PDO::PARAM_STR);
         $stmt->bindValue(':phone', $phone, PDO::PARAM_STR);
     

@@ -21,7 +21,7 @@
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" readonly>
                         </div>
-                        <div id="email-feedback"></div>
+                        
 
                         <!-- Address -->
                         <div class="mb-3">

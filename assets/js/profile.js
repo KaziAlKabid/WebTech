@@ -1,13 +1,13 @@
 import { ajaxRequest } from './ajaxHelper.js';
 
-import {validateEmail} from './auth.js';
 export async function handleEditProfile() {
     // Get all the necessary elements
     const editBtn = document.getElementById("edit-profile-btn");
     const saveBtn = document.getElementById("save-profile-btn");
     const cancelBtn = document.getElementById("cancel-edit-btn");
-    const profileFields = document.querySelectorAll("#profile-form input, #profile-form textarea");
-   
+    const profileFields = document.querySelectorAll(
+        "#profile-form input:not(#email), #profile-form textarea"
+    );
    
 
     // Enable form editing
@@ -30,24 +30,12 @@ export async function handleEditProfile() {
             feedbackDiv.innerText = '';
        
     });
-    document.getElementById("email").addEventListener('input', function () {
-        const emailInput = document.getElementById('email').value;
-        const currentUserEmail = document.getElementById('email').getAttribute('data-current'); // Store the user's current email in a `data` attribute
-        const emailFeedbackDiv = document.getElementById('email-feedback');
-        let isEmailValid =  validateEmail(emailInput, emailFeedbackDiv, 'profile', currentUserEmail);
-        
-   
 
-    });
 
     // Handle form submission via AJAX
     document.getElementById("profile-form").addEventListener("submit", async function (event) {
         event.preventDefault(); // Prevent default form submission
-        const emailInput = document.getElementById('email').value;
-const currentUserEmail = document.getElementById('email').getAttribute('data-current'); // Store the user's current email in a `data` attribute
-const emailFeedbackDiv = document.getElementById('email-feedback');
-let isEmailValid = await validateEmail(emailInput, emailFeedbackDiv, 'profile', currentUserEmail);
-if (!isEmailValid) return;
+  
    
 
 let feedbackDiv = document.getElementById('profile-feedback');
