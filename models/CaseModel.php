@@ -79,6 +79,37 @@ class CaseModel {
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     }
+    public function getCasesByStatus($status) {
+        $query = "SELECT c.*, 
+                         u.name AS client_name, 
+                         u2.name AS lawyer_name 
+                  FROM cases c
+                  INNER JOIN users u ON c.client_email = u.email  -- Join on email instead of ID
+                  LEFT JOIN users u2 ON c.assigned_lawyer_id = u2.id  -- Lawyer still uses ID
+                  WHERE c.status = :status";
+    
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':status', $status, PDO::PARAM_STR);
+        $stmt->execute();
+    
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function getRecentCases() {
+        $stmt = $this->db->query("SELECT id, client_email, lawyer_email, status FROM cases ORDER BY created_at DESC LIMIT 5");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function getCasesCountByStatus($status) {
+        $query = "SELECT COUNT(*) AS total FROM cases WHERE status = :status";
+    
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':status', $status, PDO::PARAM_STR);
+        $stmt->execute();
+    
+        return $stmt->fetch(PDO::FETCH_ASSOC)['total'];  // Fetch only the count
+    }
+    
+    
+    
 
     
     

@@ -98,8 +98,13 @@ class ReviewModel {
         $stmt->bindParam(':review_id', $reviewId);
         return $stmt->execute();
     }
+    public function getTotalReviews() {
+        $stmt = $this->db->query("SELECT COUNT(*) AS total FROM reviews");
+        return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    }
+}
     
     
 
     
-}
+

@@ -24,11 +24,30 @@ class AdminController {
     public function Dashboard() {
         $userModel = new UserModel();
         $caseModel = new CaseModel();
+        $reviewModel = new ReviewModel();
     
         $clientCount = $userModel->getClientCount();
         $lawyerCount = $userModel->getLawyerCount();
         $caseCount = $caseModel->getCaseCount();
         $userCount = $userModel->getUserCount();
+        $reviewCount = $reviewModel->getTotalReviews();
+        $adminCount = $userModel->getTotalAdmins();
+        
+        // Case Lists (Full details)
+        $pendingCasesList = $caseModel->getCasesByStatus('pending');  // Array of pending cases
+        $ongoingCasesList = $caseModel->getCasesByStatus('ongoing');  // Array of ongoing cases
+        $completedCasesList = $caseModel->getCasesByStatus('completed');  // Array of completed cases
+        
+        // Case Counts (Numbers only)
+        $pendingCasesCount = $caseModel->getCasesCountByStatus('pending');  
+        $ongoingCasesCount = $caseModel->getCasesCountByStatus('ongoing');  
+        $completedCasesCount = $caseModel->getCasesCountByStatus('completed');  
+        
+        // Recent Activity
+        $recentUsers = $userModel->getRecentUsers();
+        $recentCases = $caseModel->getRecentCases();
+        
+
     
         require_once 'views/admin/dashboard.php'; // Pass values to the view
     }

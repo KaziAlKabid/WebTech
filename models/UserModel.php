@@ -159,6 +159,15 @@ class UserModel {
         $stmt = $this->db->prepare($query);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC)['total'];}
+        public function getRecentUsers() {
+            $stmt = $this->db->query("SELECT name, role, creation_date FROM users ORDER BY creation_date DESC LIMIT 5");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+        public function getTotalAdmins() {
+            $stmt = $this->db->prepare("SELECT COUNT(*) AS total FROM users WHERE role = ?");
+            $stmt->execute(['admin']);
+            return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+        }
         
    
     
