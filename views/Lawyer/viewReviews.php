@@ -5,7 +5,7 @@
     <h2 class="text-center">Your Reviews</h2>
     
     <?php if (empty($reviews)): ?>
-        <p class="text-center text-muted">You have not given any reviews yet.</p>
+        <p class="text-center text-muted">You do not have any review yet.</p>
     <?php else: ?>
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
