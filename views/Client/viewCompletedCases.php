@@ -7,10 +7,10 @@
         <thead>
             <tr>
                 <th>Case Title</th>
-                <th>Lawyer</th>
+                <th>Case Description</th>
                 <th>Status</th>
+                <th>Assigned Lawyer</th>
                 <th>Action</th>
-                <th>Review</th>
             </tr>
         </thead>
         <tbody>
