@@ -13,8 +13,8 @@
                     <h5 class="card-title"><i class="bi bi-folder-plus"></i> See Unassigned Cases</h5>
                     <p class="card-text">View all unassigned cases.</p>
                     <a href="router.php?controller=case&action=viewUnassignedCases" class="btn btn-primary w-100">View Unassigned Cases</a>
-                </div>
             </div>
+        </div>
         </div>
 
         <div class="col-md-4">
