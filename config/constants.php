@@ -1,6 +1,6 @@
 <?php
 if (!defined('SITE_URL')) {
-    define('SITE_URL', 'http://localhost/WebTech-1/');
+    define('SITE_URL', 'http://localhost/WebTech/');
 }
 
 if (!defined('SITE_NAME')) {
